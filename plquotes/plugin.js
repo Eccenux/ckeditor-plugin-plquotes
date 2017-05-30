@@ -9,21 +9,47 @@
  */
 (function() {
 //---------------------
-// TODO: HTML support
-/*
-var ranges = selection.getRanges();
-range.cloneContents();
-or
-range.extractContents();
-*/
 
+/**
+	Get HTML of a range.
+*/
+function getRangeHtml(range) {
+	var content = range.extractContents();
+	// `content.$` is an actual DocumentFragment object (not a CKEDitor abstract)
+	var children = content.$.childNodes;
+	var html = '';
+	for (var i = 0; i < children.length; i++) {
+		var child = children[i];
+		if (typeof child.outerHTML === 'string') {
+			html += child.outerHTML;
+		} else {
+			html += child.textContent;
+		}
+	}
+	return html;
+}
+/**
+	Get HTML of a selection.
+*/
+function getSelectionHtml(selection) {
+	var ranges = selection.getRanges();
+	var html = '';
+	for (var i = 0; i < ranges.length; i++) {
+		html += getRangeHtml(ranges[i]);
+	}
+	return html;
+}
+
+/**
+	Insert quotes arround selection.
+*/
 function insertPlQuotes(editor) {
-	var selectedText = "";
+	var selectedHtml = "";
 	var selection = editor.getSelection();
 	if (selection) {
-		selectedText = selection.getSelectedText();
+		selectedHtml = getSelectionHtml(selection);
 	}
-	editor.insertHtml('„' + selectedText + '”');
+	editor.insertHtml('„' + selectedHtml + '”');
 }
 
 CKEDITOR.plugins.add( 'plquotes', {
